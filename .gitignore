@@ -7,10 +7,19 @@ __pycache__/
 .ruff_cache/
 
 .venv/
+.env
+*_cookies.txt
+cookies.txt
 venv/
 env/
 
 downloads/
+agent_data/
+Scrapling-*/
+爬取视频/
+task_plan.md
+findings.md
+progress.md
 *.mp4
 *.webm
 *.mov

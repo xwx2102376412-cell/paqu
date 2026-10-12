@@ -1,3 +1,4 @@
 scrapling[fetchers]==0.4.8
 imageio-ffmpeg==0.6.0
-yt-dlp==2026.3.17
+yt-dlp[default]==2026.7.4
+Pillow==12.3.0
