@@ -6,10 +6,10 @@
 
 ## 依赖
 
-项目优先使用 [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) 识别和下载页面中的视频格式，并使用 [D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) 抓取静态页面中的公开视频、图片和文字内容。首次使用前安装依赖：
+项目优先使用 [yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) 识别和下载页面中的视频格式，并使用 [D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) 抓取静态页面中的公开视频、图片和文字内容。`start_server.bat` 会自动寻找 Python 3.10+，并在首次启动时安装缺失的依赖。也可以手动安装：
 
 ```powershell
-C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe -m pip install -r requirements.txt
+py -3 -m pip install -r requirements.txt
 ```
 
 ## 使用
@@ -76,7 +76,7 @@ notepad .env
 同一天已经成功运行时会安全跳过。需要调试重跑可使用：
 
 ```powershell
-C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe agent_core.py --limit 100 --window-days 30 --force
+py -3 agent_core.py --limit 100 --window-days 30 --force
 ```
 
 安装每天 09:00 的 Windows 任务（错过时间后在下次可用时补跑）：
@@ -95,10 +95,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install_daily_task.ps1
 python web_app.py
 ```
 
-如果你的 `python` 命令不可用，可以用 Codex 桌面自带的 Python：
+如果 `python` 命令不可用，可以使用 Windows Python 启动器：
 
 ```powershell
-C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe web_app.py
+py -3 web_app.py
 ```
 
 然后打开：
@@ -139,10 +139,10 @@ python video_crawler.py "https://example.com/page" --json
 python video_crawler.py "https://example.com/page" --download --output-dir downloads
 ```
 
-如果你的 `python` 命令不可用，可以用 Codex 桌面自带的 Python：
+如果 `python` 命令不可用，可以使用 Windows Python 启动器：
 
 ```powershell
-C:\Users\Administrator\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe video_crawler.py "https://example.com/page"
+py -3 video_crawler.py "https://example.com/page"
 ```
 
 ## 支持范围
