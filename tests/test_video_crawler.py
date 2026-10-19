@@ -856,7 +856,7 @@ class VideoCrawlerTests(unittest.TestCase):
         self.assertEqual(output_dir, Path.cwd() / "custom-downloads")
         mkdir.assert_called_once()
 
-    def test_main_opens_agent_page_when_launcher_enables_browser(self):
+    def test_main_opens_crawler_page_when_launcher_enables_browser(self):
         import web_app
 
         class FakeServer:
@@ -879,13 +879,11 @@ class VideoCrawlerTests(unittest.TestCase):
         ), patch("web_app.threading.Timer", ImmediateTimer), patch("web_app.webbrowser.open") as browser_open:
             self.assertEqual(web_app.main(), 0)
 
-        browser_open.assert_called_once_with(f"http://{web_app.HOST}:{web_app.PORT}/agent")
+        browser_open.assert_called_once_with(f"http://{web_app.HOST}:{web_app.PORT}/")
 
-    def test_rag_management_is_separate_from_agent_page(self):
+    def test_rag_management_is_available_from_crawler(self):
         import web_app
 
-        self.assertIn('href="/rag"', web_app.AGENT_HTML)
-        self.assertNotIn('id="uploadRag"', web_app.AGENT_HTML)
         self.assertIn('id="upload"', web_app.RAG_HTML)
         self.assertIn('accept="video/*" multiple', web_app.RAG_HTML)
         self.assertIn("for(let i=0;i<files.length;i++)", web_app.RAG_HTML)

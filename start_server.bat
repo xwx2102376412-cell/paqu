@@ -31,15 +31,8 @@ if errorlevel 1 (
 echo.
 )
 
-"%PYTHON_EXE%" %PYTHON_ARGS% agent_core.py --init-db
-if errorlevel 1 (
-  echo Failed to initialize the Agent database.
-  pause
-  exit /b 1
-)
-
 echo Starting paqu video crawler...
-echo The Agent page will open automatically: http://127.0.0.1:8080/agent
+echo The single-link crawler will open automatically: http://127.0.0.1:8080/
 echo Keep this window open while using the tool.
 echo.
 

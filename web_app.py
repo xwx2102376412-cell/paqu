@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from agent_core import AgentStore, download_candidates, model_status, run_discovery, topic_payload
+from agent_core import AgentStore
 from video_crawler import (
     DEFAULT_USER_AGENT,
     DownloadCancelled,
@@ -588,7 +588,7 @@ INDEX_HTML = r"""<!doctype html>
           <h1>paqu 内容爬取工具</h1>
         </div>
       </div>
-      <div class="note"><a href="/agent">打开每日视频 Agent</a> · 本地运行 · 公开视频资源</div>
+      <div class="note"><a href="/rag">打开视觉 RAG 知识库</a> · 本地运行 · 公开视频资源</div>
     </header>
 
     <form class="command" id="scanForm">
@@ -1076,7 +1076,7 @@ RAG_HTML = r"""<!doctype html>
 <title>视觉 RAG 知识库</title><style>
 :root{--bg:#eef3f0;--panel:#fffdf8;--ink:#17211d;--muted:#65716c;--line:#d7d8ce;--accent:#146c5b;--danger:#a33c32}*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#e9f2ed,#f7f0e3);color:var(--ink);font:14px/1.5 system-ui,"Microsoft YaHei",sans-serif}.shell{width:min(1100px,calc(100% - 28px));margin:24px auto 50px}header,.panel{background:var(--panel);border:1px solid var(--line);box-shadow:0 12px 34px #22352b12;border-radius:18px}header{padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:20px}h1{margin:0 0 4px;font-size:27px}.sub{color:var(--muted)}a{color:var(--accent)}.panel{margin-top:14px;padding:18px}.upload{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}button,input{font:inherit}input[type=file],input[type=text]{border:1px solid var(--line);border-radius:9px;padding:10px;background:white}button{border:0;border-radius:9px;padding:10px 14px;background:var(--accent);color:white;font-weight:700;cursor:pointer}button.danger{background:var(--danger)}button.alt{background:#e6ece8;color:var(--ink)}button:disabled{opacity:.5}.status{margin-top:10px;color:var(--muted)}table{width:100%;border-collapse:collapse;margin-top:8px}th,td{padding:12px;border-bottom:1px solid #e7e7df;text-align:left;vertical-align:middle}th{color:var(--muted);background:#f0f3ef}.name-edit{display:flex;gap:8px}.name-edit input{min-width:220px;flex:1}.actions{display:flex;gap:8px}.empty{padding:38px;text-align:center;color:var(--muted)}@media(max-width:700px){header{align-items:flex-start;flex-direction:column}.upload{grid-template-columns:1fr}.actions,.name-edit{flex-wrap:wrap}}
 </style></head><body><main class="shell">
-<header><div><h1>视觉 RAG 知识库</h1><div class="sub">管理用于画面相似检索的样本视频和关键帧索引</div></div><div><a href="/agent">返回视频发现 Agent</a></div></header>
+<header><div><h1>视觉 RAG 知识库</h1><div class="sub">管理用于画面相似检索的样本视频和关键帧索引</div></div><div><a href="/">返回单链接爬取工具</a></div></header>
 <section class="panel"><div class="upload"><input id="ragFile" type="file" accept="video/*" multiple><button id="upload">批量上传并建立索引</button></div><div class="status" id="status">可一次选择多个视频；单个视频最大 250 MB，每个样本最多抽取 12 张关键帧。</div></section>
 <section class="panel"><strong id="count">0 个样本</strong><div id="list"><div class="empty">正在读取知识库…</div></div></section>
 </main><script>
@@ -1513,15 +1513,6 @@ class AppHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
             return
 
-        if parsed.path == "/agent":
-            body = AGENT_HTML.encode("utf-8")
-            self.send_response(HTTPStatus.OK)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-            return
-
         if parsed.path == "/rag":
             body = RAG_HTML.encode("utf-8")
             self.send_response(HTTPStatus.OK)
@@ -1529,27 +1520,6 @@ class AppHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
             self.wfile.write(body)
-            return
-
-        if parsed.path == "/api/agent/config":
-            json_response(self, HTTPStatus.OK, {"topics": topic_payload(), "limit": 100, "window_days": 30, "models": model_status()})
-            return
-
-        if parsed.path == "/api/agent/status":
-            with AGENT_RUN_LOCK:
-                state = dict(AGENT_RUN_STATE)
-            json_response(self, HTTPStatus.OK, state)
-            return
-
-        if parsed.path == "/api/agent/candidates":
-            query = urllib.parse.parse_qs(parsed.query)
-            filters = {key: values[0] for key, values in query.items() if values}
-            filters["relevance"] = "高相关"
-            json_response(self, HTTPStatus.OK, {"candidates": agent_store().list_candidates(filters)})
-            return
-
-        if parsed.path == "/api/agent/runs":
-            json_response(self, HTTPStatus.OK, {"runs": agent_store().list_runs()})
             return
 
         if parsed.path == "/api/agent/rag":
@@ -1579,18 +1549,6 @@ class AppHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/api/cookies/import":
                 self.handle_import_cookies()
-                return
-            if self.path == "/api/agent/run":
-                self.handle_agent_run()
-                return
-            if self.path == "/api/agent/review":
-                self.handle_agent_review()
-                return
-            if self.path == "/api/agent/download":
-                self.handle_agent_download()
-                return
-            if self.path == "/api/agent/open-folder":
-                self.handle_agent_open_folder()
                 return
             if self.path == "/api/agent/rag/upload":
                 self.handle_agent_rag_upload()
@@ -1863,7 +1821,7 @@ def main() -> int:
     print(f"paqu video crawler running at http://{HOST}:{PORT}")
     print("Press Ctrl+C to stop.")
     if os.environ.get("PAQU_OPEN_BROWSER", "").strip() == "1":
-        start_url = f"http://{HOST}:{PORT}/agent"
+        start_url = f"http://{HOST}:{PORT}/"
         threading.Timer(0.4, webbrowser.open, args=(start_url,)).start()
     try:
         server.serve_forever()
